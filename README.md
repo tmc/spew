@@ -1,6 +1,9 @@
 go-spew
 =======
 
+[![Build Status](https://travis-ci.org/davecgh/go-spew.png?branch=master)]
+(https://travis-ci.org/davecgh/go-spew)
+
 Go-spew implements a deep pretty printer for Go data structures to aid in
 debugging.  A comprehensive suite of tests with 100% test coverage is provided
 to ensure proper functionality.  See `test_coverage.txt` for the gocov coverage
@@ -13,6 +16,9 @@ post about it
 [here](https://blog.cyphertite.com/go-spew-a-journey-into-dumping-go-data-structures/).
 
 ## Documentation
+
+[![GoDoc](https://godoc.org/github.com/davecgh/go-spew/spew?status.png)]
+(http://godoc.org/github.com/davecgh/go-spew/spew)
 
 Full `go doc` style documentation for the project can be viewed online without
 installing this package by using the excellent GoDoc site here:
@@ -119,6 +125,14 @@ options. See the ConfigState documentation for more details.
 * ContinueOnMethod
 	Enables recursion into types after invoking error and Stringer interface
 	methods. Recursion after method invocation is disabled by default.
+
+* SortKeys
+	Specifies map keys should be sorted before being printed. Use
+	this to have a more deterministic, diffable output.  Note that
+	only native types (bool, int, uint, floats, uintptr and string)
+	are supported with other types sorted according to the
+	reflect.Value.String() output which guarantees display stability.
+	Natural map order is used by default.
 ```
 
 ## License

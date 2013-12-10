@@ -349,6 +349,9 @@ func (d *dumpState) dump(v reflect.Value) {
 		} else {
 			numEntries := v.Len()
 			keys := v.MapKeys()
+			if d.cs.SortKeys {
+				sortValues(keys)
+			}
 			for i, key := range keys {
 				d.dump(d.unpackValue(key))
 				d.w.Write(colonSpaceBytes)

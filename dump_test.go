@@ -896,3 +896,17 @@ func TestDump(t *testing.T) {
 		}
 	}
 }
+
+func TestDumpSortedKeys(t *testing.T) {
+	cfg := spew.ConfigState{SortKeys: true}
+	s := cfg.Sdump(map[int]string{1: "1", 3: "3", 2: "2"})
+	expected := `(map[int]string) {
+(int) 1: (string) "1",
+(int) 2: (string) "2",
+(int) 3: (string) "3"
+}
+`
+	if s != expected {
+		t.Errorf("Sorted keys mismatch:\n  %v %v", s, expected)
+	}
+}

@@ -18,6 +18,9 @@ package spew_test
 
 import (
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
+	"reflect"
+	"testing"
 )
 
 // custom type to test Stinger interface on non-pointer receiver.
@@ -108,4 +111,82 @@ func testFailed(result string, wants []string) bool {
 		}
 	}
 	return true
+}
+
+// TestSortValues ensures the sort functionality for relect.Value based sorting
+// works as intended.
+func TestSortValues(t *testing.T) {
+	getInterfaces := func(values []reflect.Value) []interface{} {
+		interfaces := []interface{}{}
+		for _, v := range values {
+			interfaces = append(interfaces, v.Interface())
+		}
+		return interfaces
+	}
+
+	v := reflect.ValueOf
+
+	a := v("a")
+	b := v("b")
+	c := v("c")
+	embedA := v(embed{"a"})
+	embedB := v(embed{"b"})
+	embedC := v(embed{"c"})
+	tests := []struct {
+		input    []reflect.Value
+		expected []reflect.Value
+	}{
+		// No values.
+		{
+			[]reflect.Value{},
+			[]reflect.Value{},
+		},
+		// Bools.
+		{
+			[]reflect.Value{v(false), v(true), v(false)},
+			[]reflect.Value{v(false), v(false), v(true)},
+		},
+		// Ints.
+		{
+			[]reflect.Value{v(2), v(1), v(3)},
+			[]reflect.Value{v(1), v(2), v(3)},
+		},
+		// Uints.
+		{
+			[]reflect.Value{v(uint8(2)), v(uint8(1)), v(uint8(3))},
+			[]reflect.Value{v(uint8(1)), v(uint8(2)), v(uint8(3))},
+		},
+		// Floats.
+		{
+			[]reflect.Value{v(2.0), v(1.0), v(3.0)},
+			[]reflect.Value{v(1.0), v(2.0), v(3.0)},
+		},
+		// Strings.
+		{
+			[]reflect.Value{b, a, c},
+			[]reflect.Value{a, b, c},
+		},
+		// Uintptrs.
+		{
+			[]reflect.Value{v(uintptr(2)), v(uintptr(1)), v(uintptr(3))},
+			[]reflect.Value{v(uintptr(1)), v(uintptr(2)), v(uintptr(3))},
+		},
+		// Invalid.
+		{
+			[]reflect.Value{embedB, embedA, embedC},
+			[]reflect.Value{embedB, embedA, embedC},
+		},
+	}
+	for _, test := range tests {
+		spew.SortValues(test.input)
+		// reflect.DeepEqual cannot really make sense of reflect.Value,
+		// probably because of all the pointer tricks. For instance,
+		// v(2.0) != v(2.0) on a 32-bits system. Turn them into interface{}
+		// instead.
+		input := getInterfaces(test.input)
+		expected := getInterfaces(test.expected)
+		if !reflect.DeepEqual(input, expected) {
+			t.Errorf("Sort mismatch:\n %v != %v", input, expected)
+		}
+	}
 }
