@@ -81,19 +81,12 @@ func TestInvalidReflectValue(t *testing.T) {
 	}
 }
 
-// flagRO, flagKindShift and flagKindWidth indicate various bit flags that the
-// reflect package uses internally to track kind and state information.
-const flagRO = 1 << 0
-const flagKindShift = 4
-const flagKindWidth = 5
-
 // changeKind uses unsafe to intentionally change the kind of a reflect.Value to
 // the maximum kind value which does not exist.  This is needed to test the
 // fallback code which punts to the standard fmt library for new types that
 // might get added to the language.
 func changeKind(v *reflect.Value, readOnly bool) {
-	rvf := (*uintptr)(unsafe.Pointer(uintptr(unsafe.Pointer(v)) +
-		unsafe.Offsetof(reflectValue.flag)))
+	rvf := (*uintptr)(unsafe.Pointer(uintptr(unsafe.Pointer(v)) + offsetFlag))
 	*rvf = *rvf | ((1<<flagKindWidth - 1) << flagKindShift)
 	if readOnly {
 		*rvf |= flagRO
